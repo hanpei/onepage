@@ -1,0 +1,2 @@
+- try to write a static site genertor
+- convert md posts to html
