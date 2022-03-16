@@ -1,27 +1,45 @@
-pub const HEADER: &str = r#" <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-"#;
+use anyhow::Result;
+use serde::Serialize;
+use tera::Tera;
 
-pub fn render_body(body: &str) -> String {
-    format!(
-        r#"  <body>
-    <nav>
-        <a href="/">Home</a>
-    </nav>
-    <br />
-    {}
-  </body>"#,
-        body
-    )
+lazy_static::lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        let mut tera = match Tera::new("templates/**/*") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Parsing error(s): {}", e);
+                ::std::process::exit(1);
+            }
+        };
+        tera.autoescape_on(vec![]);
+        // tera.register_filter("do_nothing", do_nothing_filter);
+        println!("  - Tera loaded {} templates", tera.templates.len());
+        tera
+    };
 }
 
-pub const FOOTER: &str = r#"
+pub fn render_template(template_name: &str, data: &impl Serialize) -> Result<String> {
+    let ctx = tera::Context::from_serialize(data)?;
+    Ok(TEMPLATES.render(template_name, &ctx)?)
+}
 
-</html>
-"#;
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_user() {
+        #[derive(Serialize)]
+        struct User {
+            name: String,
+        }
+        let user = User {
+            name: "test".to_string(),
+        };
+        let rendered = TEMPLATES
+            .render("post.html", &tera::Context::from_serialize(&user).unwrap())
+            .unwrap();
+
+        println!("{}", rendered);
+    }
+}

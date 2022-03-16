@@ -1,9 +1,7 @@
 ---
-title: This is the title
+title: abc
 date: 2022-11-21 10:54:39
 tags:
-  - awesome-tag
-  - more-awesome-tag
 ---
 
 # abc

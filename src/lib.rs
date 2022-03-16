@@ -1,34 +1,36 @@
 mod posts;
+mod templates;
+use std::{fs::create_dir_all, path::PathBuf};
+
 use anyhow::Result;
 
-pub use posts::*;
+use posts::*;
 
-pub fn load_posts(posts_dir: &str) -> Result<Vec<Post>> {
-    let mut posts = Vec::new();
-    walkdir::WalkDir::new("posts")
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .filter(|e| e.path().display().to_string().ends_with(".md"))
-        .for_each(|e| match Post::load(e.path()) {
-            Ok(p) => posts.push(p),
-            Err(e) => {
-                println!("load posts error:  {}", e);
-            }
-        });
+const POSTS_DIR: &str = "posts";
+const POST_TEMPLATE: &str = "post.html";
+const OUTPUT_PATH: &str = "dist";
 
-    Ok(posts)
+pub fn build() -> Result<()> {
+    build_posts()?;
+    build_index()?;
+    Ok(())
 }
 
-#[cfg(test)]
-mod tests {
+fn build_posts() -> Result<()> {
+    println!(" ▶️ Building posts...");
+    create_dir_all(PathBuf::from(OUTPUT_PATH).join(POSTS_DIR))?;
+    let posts = load_posts(POSTS_DIR)?;
 
-    use super::*;
-
-    #[test]
-    fn test_load_posts() {
-        let posts = load_posts("posts").unwrap();
-        println!("{:#?}", posts);
-        assert_eq!(posts.len(), 2);
+    for post in posts {
+        let rendered = templates::render_template(POST_TEMPLATE, &post)?;
+        let path = post.path.with_extension("html");
+        let output = PathBuf::from(OUTPUT_PATH).join(path);
+        std::fs::write(output, rendered)?;
     }
+    Ok(())
+}
+
+fn build_index() -> Result<()> {
+    println!(" ▶️ Building index...");
+    Ok(())
 }

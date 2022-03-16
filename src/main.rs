@@ -1,13 +1,16 @@
-use static_site_generator::load_posts;
+use static_site_generator::build;
 
 fn main() {
-    load_posts("/posts").unwrap();
+    match build() {
+        Ok(_) => {}
+        Err(e) => {
+            println!("❌ Building ERROR: {:?}", e);
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-
-    use super::*;
 
     #[test]
     fn test_walkdir() {
