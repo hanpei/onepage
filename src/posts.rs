@@ -5,14 +5,41 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::parse_md_to_html;
+use crate::{markdown::parse_md_to_html, BASE_DIR};
+
+/**
+ * Load posts from a dictionary.
+ */
+pub fn load_posts<P: AsRef<Path>>(posts_dir: P) -> Result<Vec<Post>> {
+    let mut posts = Vec::new();
+    walkdir::WalkDir::new(posts_dir)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+        .filter(|e| e.path().display().to_string().ends_with(".md"))
+        .for_each(|e| match Post::load(e.path()) {
+            Ok(p) => posts.push(p),
+            Err(e) => {
+                println!("load posts error:  {}", e);
+            }
+        });
+
+    Ok(posts)
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Post {
     pub front_matter: FrontMatter,
     pub path: PathBuf,
+    pub url: PathBuf,
     pub title: String,
     pub content: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PostIndex {
+    title: String,
+    url: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -38,12 +65,21 @@ impl Post {
         let (fm, md) = Self::read_front_matter(&raw_content);
         let title = fm.title.clone();
         let content = parse_md_to_html(&md);
+        let path = path.as_ref().strip_prefix(BASE_DIR).unwrap().to_path_buf();
         Ok(Post {
             front_matter: fm,
-            path: path.as_ref().to_owned(),
+            path: path.to_owned(),
+            url: Path::new("/").join(path).with_extension("html"),
             title,
             content,
         })
+    }
+
+    pub fn get_index(&self) -> PostIndex {
+        PostIndex {
+            title: self.title.clone(),
+            url: self.url.to_string_lossy().to_string(),
+        }
     }
 
     pub fn read_front_matter(content: &str) -> (FrontMatter, String) {
@@ -61,8 +97,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_load_posts() {
+        let posts = load_posts("pages/posts").unwrap();
+        assert_eq!(posts.len(), 3);
+    }
+
+    #[test]
     fn test_load_post() {
-        let post = Post::load("posts/test.md").unwrap();
+        let post = Post::load("pages/posts/test.md").unwrap();
         println!("{:#?}", post);
     }
 

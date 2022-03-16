@@ -28,17 +28,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_user() {
-        #[derive(Serialize)]
-        struct User {
-            name: String,
-        }
-        let user = User {
-            name: "test".to_string(),
-        };
-        let rendered = TEMPLATES
-            .render("post.html", &tera::Context::from_serialize(&user).unwrap())
-            .unwrap();
+    fn test_render_template() {
+        let mut ctx = tera::Context::new();
+        ctx.insert("title", "test title");
+        ctx.insert("content", "hello world");
+        let rendered = TEMPLATES.render("post.html", &ctx).unwrap();
 
         println!("{}", rendered);
     }
