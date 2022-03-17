@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{markdown::parse_md_to_html, BASE_DIR};
+use crate::{markdown::parse_md_to_html, PAGE_DIR};
 
 /**
  * Load posts from a dictionary.
@@ -65,7 +65,7 @@ impl Post {
         let (fm, md) = Self::read_front_matter(&raw_content);
         let title = fm.title.clone();
         let content = parse_md_to_html(&md);
-        let path = path.as_ref().strip_prefix(BASE_DIR).unwrap().to_path_buf();
+        let path = path.as_ref().strip_prefix(PAGE_DIR).unwrap().to_path_buf();
         Ok(Post {
             front_matter: fm,
             path: path.to_owned(),

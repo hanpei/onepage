@@ -1,3 +1,5 @@
-{% extends "layout.html" %} {% block content %}
-<header></header>
-{{ content }} {% endblock content %}
+{% extends "base.html" %} {% block content %}
+<header class="header"><a href="/">← Home</a></header>
+<main class="container">{{ content }}</main>
+
+{% endblock content %}

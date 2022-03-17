@@ -8,6 +8,8 @@ pub fn parse_md_to_html(markdown_input: &str) -> String {
     // and we therefore must enable it explicitly.
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_TASKLISTS);
+    options.insert(Options::ENABLE_SMART_PUNCTUATION);
     let parser = Parser::new_ext(markdown_input, options);
 
     // Write to String buffer.

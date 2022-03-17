@@ -1,0 +1,77 @@
+* {
+  font-family: system-ui;
+}
+details p {
+  margin-top: 25px;
+  font-size: 18px;
+}
+
+h1 {
+  margin-bottom: 2px;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: 10px;
+}
+
+.container {
+  margin-top: 80px;
+  max-width: 800px;
+}
+.header {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Pink Light scheme (Default) */
+/* Can be forced with data-theme="light" */
+[data-theme='light'],
+:root:not([data-theme='dark']) {
+  /* --primary: #d81b60; */
+  --primary: #ee719a;
+  --primary-hover: #ffa7c4;
+  --primary-focus: rgba(216, 27, 96, 0.125);
+  --primary-inverse: #fff;
+}
+
+/* Pink Dark scheme (Auto) */
+/* Automatically enabled if user has Dark mode enabled */
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary: #ee719a;
+    --primary-hover: #ffa7c4;
+    --primary-focus: rgba(216, 27, 96, 0.25);
+    --primary-inverse: #fff;
+  }
+}
+
+/* Pink Dark scheme (Forced) */
+/* Enabled if forced with data-theme="dark" */
+[data-theme='dark'] {
+  --primary: #ee719a;
+  --primary-hover: #ffa7c4;
+  --primary-focus: rgba(216, 27, 96, 0.25);
+  --primary-inverse: #fff;
+}
+
+/* Pink (Common styles) */
+:root {
+  --form-element-active-border-color: var(--primary);
+  --form-element-focus-color: var(--primary-focus);
+  --switch-color: var(--primary-inverse);
+  --switch-checked-background-color: var(--primary);
+  --code-background-color: #18232c;
+  --del-color: #4e6272;
+}
+
+.hljs {
+  background: #18232c;
+}
+.hljs ::selection,
+.hljs::selection {
+  background-color: #213241;
+}
