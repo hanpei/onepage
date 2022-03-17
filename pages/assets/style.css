@@ -7,7 +7,7 @@ details p {
 }
 
 h1 {
-  margin-bottom: 2px;
+  margin-bottom: 20px;
 }
 
 h2,
@@ -74,4 +74,14 @@ h6 {
 .hljs ::selection,
 .hljs::selection {
   background-color: #213241;
+}
+
+.hljs::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
+}
+.hljs {
+  scrollbar-width: none; /* firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  overflow-x: hidden;
+  overflow-y: auto;
 }

@@ -1,5 +1,9 @@
 {% extends "base.html" %} {% block content %}
 <header class="header"><a href="/">← Home</a></header>
-<main class="container">{{ content }}</main>
+
+<main class="container">
+  <h1>{{title}}</h1>
+  {{ content }}
+</main>
 
 {% endblock content %}
