@@ -1,15 +1,10 @@
 ---
-title: test syntax
+title: Syntax Highlight Demo
 date: 2022-03-18 10:54:39
 tags:
 ---
 
-# abc
-
-- 1
-- 2
-
-abcdefghih
+# Syntax Highlight Demo
 
 ```ts
 class MyClass {

@@ -46,6 +46,7 @@ impl SiteBuilder {
         self.build_posts()?;
         self.build_index()?;
         self.build_assets()?;
+        println!("✅ Build success.");
         Ok(())
     }
 

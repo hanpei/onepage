@@ -19,6 +19,8 @@ impl LoadSourceFile for Posts {
      * Load posts from a dictionary.
      */
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
+        print!(" ▶️ Loading posts ...");
+
         let mut posts = Vec::new();
         walkdir::WalkDir::new(path)
             .into_iter()

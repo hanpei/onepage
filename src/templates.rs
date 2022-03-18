@@ -13,7 +13,7 @@ lazy_static::lazy_static! {
         };
         tera.autoescape_on(vec![]);
         // tera.register_filter("do_nothing", do_nothing_filter);
-        println!("  - Tera loaded {} templates", tera.templates.len());
+        println!("\t- Tera loaded {} templates", tera.templates.len());
         tera
     };
 }

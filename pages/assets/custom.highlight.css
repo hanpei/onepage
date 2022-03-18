@@ -21,7 +21,7 @@
 
 .hljs {
   background: var(--code-background-color);
-  color: var(--code-color);
+  color: var(--h6-color);
 }
 .hljs-comment {
   color: var(--code-comment-color);
