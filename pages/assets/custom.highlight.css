@@ -1,0 +1,94 @@
+/*!
+  Theme: Default
+  Description: Original highlight.js style
+  Author: (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
+  Maintainer: @highlightjs/core-team
+  Website: https://highlightjs.org/
+  License: see project LICENSE
+  Touched: 2021
+*/
+
+/** pico code color variable
+    --code-background-color: #18232c;
+    --code-color: var(--muted-color);
+    --code-kbd-background-color: var(--contrast);
+    --code-kbd-color: var(--contrast-inverse);
+    --code-tag-color: #a65980;
+    --code-property-color: #599fa6;
+    --code-value-color: #8c8473;
+    --code-comment-color: #4d606d;
+*/
+
+.hljs {
+  background: var(--code-background-color);
+  color: var(--code-color);
+}
+.hljs-comment {
+  color: var(--code-comment-color);
+}
+.hljs-punctuation,
+.hljs-tag {
+  color: var(--code-color);
+}
+.hljs-tag .hljs-attr {
+  color: var(--code-property-color);
+}
+.hljs-tag .hljs-name {
+  color: var(--code-tag-color);
+}
+.hljs-attribute,
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-name,
+.hljs-selector-tag {
+  color: var(--code-tag-color);
+}
+.hljs-deletion,
+.hljs-number,
+.hljs-quote,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-string,
+.hljs-template-tag,
+.hljs-type {
+  color: var(--code-value-color);
+}
+.hljs-section,
+.hljs-title {
+  color: var(--code-tag-color);
+}
+.hljs-link,
+.hljs-operator,
+.hljs-regexp,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-symbol,
+.hljs-template-variable,
+.hljs-variable {
+  color: var(--code-property-color);
+}
+.hljs-literal {
+  color: var(--code-value-color);
+}
+.hljs-property {
+  color: var(--code-property-color);
+}
+.hljs-addition,
+.hljs-built_in,
+.hljs-bullet,
+.hljs-code {
+  color: var(--code-value-color);
+}
+.hljs-meta {
+  color: var(--code-value-color);
+}
+.hljs-meta .hljs-string {
+  color: var(--code-value-color);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}

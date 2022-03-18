@@ -5,21 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
-    <link rel="stylesheet" type="text/css" href="/assets/pico.min.css" />
-    <link rel="stylesheet" href="/assets/zenburn.min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/pico.classless.css" />
+    <link rel="stylesheet" href="/assets/custom.highlight.css" />
     <link rel="stylesheet" type="text/css" href="/assets/style.css" />
-
-    <title>{{title}}</title>
-  </head>
-  <body class="container">
-    {% block content %}{% endblock content %}
-    <footer style="text-align: center">
-      <small>hanpei@2022</small>
-    </footer>
     <script src="/assets/highlight.min.js"></script>
-
     <script>
       hljs.highlightAll();
     </script>
+
+    <title>{{title}}</title>
+  </head>
+  <body>
+    {% block content %}{% endblock content %}
+    <footer>
+      <small>hanpei@2022</small>
+    </footer>
   </body>
 </html>

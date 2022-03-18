@@ -1,6 +1,6 @@
-* {
+/* * {
   font-family: system-ui;
-}
+} */
 details p {
   margin-top: 25px;
   font-size: 18px;
@@ -35,6 +35,7 @@ header {
   --primary-hover: #ffa7c4;
   --primary-focus: rgba(216, 27, 96, 0.125);
   --primary-inverse: #fff;
+  --code-tag-color: #ee719a;
 }
 
 /* Pink Dark scheme (Auto) */
@@ -45,6 +46,7 @@ header {
     --primary-hover: #ffa7c4;
     --primary-focus: rgba(216, 27, 96, 0.25);
     --primary-inverse: #fff;
+    --code-tag-color: #ee719a;
   }
 }
 
@@ -55,6 +57,7 @@ header {
   --primary-hover: #ffa7c4;
   --primary-focus: rgba(216, 27, 96, 0.25);
   --primary-inverse: #fff;
+  --code-tag-color: #ee719a;
 }
 
 /* Pink (Common styles) */
@@ -63,24 +66,19 @@ header {
   --form-element-focus-color: var(--primary-focus);
   --switch-color: var(--primary-inverse);
   --switch-checked-background-color: var(--primary);
-  --code-background-color: #18232c;
   --del-color: #4e6272;
+  --code-tag-color: #ee719a;
 }
 
-.hljs {
-  background: #18232c;
-}
-.hljs ::selection,
-.hljs::selection {
-  background-color: #213241;
+@media (min-width: 1200px) {
+  body > header,
+  body > main,
+  body > footer {
+    max-width: 920px;
+  }
 }
 
-.hljs::-webkit-scrollbar {
-  display: none; /* Chrome Safari */
-}
-.hljs {
-  scrollbar-width: none; /* firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-  overflow-x: hidden;
-  overflow-y: auto;
+body > header {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }

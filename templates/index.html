@@ -1,19 +1,21 @@
 {% extends "base.html" %} {% block content %}
 <header><h1>{{title}}</h1></header>
-<small>
-  <i>By <a href="https://github.com/hanpei" target="_blank">hanpei</a></i>
-</small>
+<main>
+  <small>
+    <i>By <a href="https://github.com/hanpei" target="_blank">hanpei</a></i>
+  </small>
 
-<br />
-<br />
-<br />
+  <br />
+  <br />
+  <br />
 
-<article>{{content}}</article>
-<ul class="postlist">
-  {% for post in posts %}
-  <li>
-    <a href="{{ post.url }}">{{ post.title }}</a>
-  </li>
-  {% endfor %}
-</ul>
-{% endblock content %}
+  <section>{{content}}</section>
+  <ul>
+    {% for post in posts %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endblock content %}
+</main>
