@@ -1,45 +1,97 @@
 use anyhow::Result;
 use chrono::Local;
 use gray_matter::{engine::YAML, Matter};
-use std::path::{Path, PathBuf};
+use std::{
+    ops::{Deref, DerefMut},
+    path::{Path, PathBuf},
+};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{markdown::parse_md_to_html, PAGE_DIR};
+use crate::{markdown::parse_md_to_html, LoadSourceFile, PAGE_DIR};
 
-/**
- * Load posts from a dictionary.
- */
-pub fn load_posts<P: AsRef<Path>>(posts_dir: P) -> Result<Vec<Post>> {
-    let mut posts = Vec::new();
-    walkdir::WalkDir::new(posts_dir)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .filter(|e| e.path().display().to_string().ends_with(".md"))
-        .for_each(|e| match Post::load(e.path()) {
-            Ok(p) => posts.push(p),
-            Err(e) => {
-                println!("load posts error:  {}", e);
-            }
-        });
-
-    Ok(posts)
+pub struct Posts {
+    inner: Vec<Post>,
 }
+impl LoadSourceFile for Posts {
+    type Item = Vec<Post>;
+    /**
+     * Load posts from a dictionary.
+     */
+    fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
+        let mut posts = Vec::new();
+        walkdir::WalkDir::new(path)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .filter(|e| e.path().display().to_string().ends_with(".md"))
+            .for_each(|e| match Post::load(e.path()) {
+                Ok(p) => posts.push(p),
+                Err(e) => {
+                    println!("load posts error:  {}", e);
+                }
+            });
+
+        Ok(posts)
+    }
+}
+
+impl Deref for Posts {
+    type Target = Vec<Post>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+impl DerefMut for Posts {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+// /**
+//  * Load posts from a dictionary.
+//  */
+// pub fn load_posts<P: AsRef<Path>>(posts_dir: P) -> Result<Vec<Post>> {
+//     let mut posts = Vec::new();
+//     walkdir::WalkDir::new(posts_dir)
+//         .into_iter()
+//         .filter_map(|e| e.ok())
+//         .filter(|e| e.file_type().is_file())
+//         .filter(|e| e.path().display().to_string().ends_with(".md"))
+//         .for_each(|e| match Post::load(e.path()) {
+//             Ok(p) => posts.push(p),
+//             Err(e) => {
+//                 println!("load posts error:  {}", e);
+//             }
+//         });
+
+//     Ok(posts)
+// }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Post {
     pub front_matter: FrontMatter,
     pub path: PathBuf,
-    pub url: PathBuf,
+    pub url: String,
     pub title: String,
     pub content: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PostIndex {
-    title: String,
-    url: String,
+    pub title: String,
+    pub url: String,
+    pub date: String,
+}
+
+impl From<&Post> for PostIndex {
+    fn from(post: &Post) -> Self {
+        Self {
+            title: post.title.clone(),
+            url: post.url.clone(),
+            date: post.front_matter.date.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -69,17 +121,14 @@ impl Post {
         Ok(Post {
             front_matter: fm,
             path: path.to_owned(),
-            url: Path::new("/").join(path).with_extension("html"),
+            url: Path::new("/")
+                .join(path)
+                .with_extension("html")
+                .display()
+                .to_string(),
             title,
             content,
         })
-    }
-
-    pub fn get_index(&self) -> PostIndex {
-        PostIndex {
-            title: self.title.clone(),
-            url: self.url.to_string_lossy().to_string(),
-        }
     }
 
     pub fn read_front_matter(content: &str) -> (FrontMatter, String) {
@@ -98,7 +147,7 @@ mod tests {
 
     #[test]
     fn test_load_posts() {
-        let posts = load_posts("pages/posts").unwrap();
+        let posts = Posts::load("pages/posts").unwrap();
         assert_eq!(posts.len(), 3);
     }
 

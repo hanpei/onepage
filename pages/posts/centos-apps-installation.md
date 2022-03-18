@@ -1,6 +1,6 @@
 ---
 title: centos服务器各种应用安装
-date: 2020-06-05 21:43:33
+date: 2022-03-16 21:43:33
 tags:
   - centos
   - setup

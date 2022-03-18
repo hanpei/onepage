@@ -1,7 +1,8 @@
-use static_site_generator::build;
+use static_site_generator::SiteBuilder;
 
 fn main() {
-    match build() {
+    let result = SiteBuilder::new("pages").build();
+    match result {
         Ok(_) => {}
         Err(e) => {
             println!("❌ Building ERROR: {:?}", e);
