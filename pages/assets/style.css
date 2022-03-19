@@ -118,3 +118,7 @@ footer > [role='link']:is([aria-current], :hover, :active, :focus) {
   cursor: pointer;
   color: #415462;
 }
+
+.container {
+  max-width: 920px;
+}
