@@ -1,7 +1,9 @@
 mod index;
 mod markdown;
 mod posts;
+mod server;
 mod templates;
+
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -24,9 +26,9 @@ pub trait LoadSourceFile {
 }
 
 pub struct SiteBuilder {
-    base_path: PathBuf,
-    index: IndexPage,
-    posts: Vec<Post>,
+    pub base_path: PathBuf,
+    pub index: IndexPage,
+    pub posts: Vec<Post>,
 }
 
 impl SiteBuilder {
@@ -40,6 +42,12 @@ impl SiteBuilder {
         }
     }
 
+    pub fn reload(&mut self) -> Result<()> {
+        self.posts = Posts::load(self.base_path.join(POSTS_DIR)).expect("loading posts error");
+        self.index = IndexPage::load(self.base_path.as_path()).expect("loading index page error");
+        self.build()
+    }
+
     pub fn build(&mut self) -> Result<()> {
         fs::remove_dir_all(OUTPUT_PATH)?;
         fs::create_dir_all(OUTPUT_PATH)?;
@@ -51,7 +59,7 @@ impl SiteBuilder {
     }
 
     fn build_posts(&mut self) -> Result<()> {
-        println!(" ▶️ Building posts...");
+        println!("🏃🏻 Building post pages...");
         let output = PathBuf::from(OUTPUT_PATH).join(POSTS_DIR);
         fs::create_dir_all(output)?;
 
@@ -61,22 +69,26 @@ impl SiteBuilder {
             let output = PathBuf::from(OUTPUT_PATH).join(path);
             std::fs::write(output, rendered)?;
         }
+        println!("\t- {} post pages built.", self.posts.len());
 
         Ok(())
     }
 
     fn crate_post_index(&mut self) -> Vec<PostIndex> {
+        println!("🏃🏻 Create post index ...");
+
         let mut post_index = self
             .posts
             .iter()
             .map(|post| post.into())
             .collect::<Vec<PostIndex>>();
         post_index.sort_by(|a, b| b.date.cmp(&a.date));
+        println!("\t- {} post index created.", post_index.len());
         post_index
     }
 
     fn build_index(&mut self) -> Result<()> {
-        println!(" ▶️ Building index...");
+        println!("🏃🏻 Building index page...");
         let post_index = self.crate_post_index();
         self.index.set_post_index(post_index);
         let rendered = templates::render_template(INDEX_TEMPLATE, &self.index)?;
@@ -86,7 +98,7 @@ impl SiteBuilder {
     }
 
     fn build_assets(&mut self) -> Result<()> {
-        println!(" ▶️ Copying assets...");
+        println!("🏃🏻 Copying assets...");
         let input = self.base_path.join("assets");
         let output = PathBuf::from(OUTPUT_PATH);
 
@@ -97,13 +109,30 @@ impl SiteBuilder {
             .for_each(|e| {
                 let input = e.path();
                 let output = output.join(input.strip_prefix(PAGE_DIR).unwrap());
-                println!("\tinput\t - {}", input.display());
-                println!("\toutput\t - {}", output.display());
+                // println!("\tinput\t - {}", input.display());
+                // println!("\t- {}", output.display());
 
                 fs::create_dir_all(output.parent().unwrap()).unwrap();
                 fs::copy(input, output).unwrap();
             });
 
+        //copy ico and favicon
+        walkdir::WalkDir::new(self.base_path.clone())
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .filter(|e| {
+                let filename = e.file_name().to_str().unwrap();
+                filename != "index.md" && !filename.starts_with(".")
+            })
+            .for_each(|e| {
+                let input = e.path();
+                let output = output.join(input.strip_prefix(PAGE_DIR).unwrap());
+                // println!("\tinput\t - {}", input.display());
+                // println!("\t- {}", output.display());
+
+                fs::copy(input, output).unwrap();
+            });
         Ok(())
     }
 }

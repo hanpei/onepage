@@ -4,7 +4,6 @@ date: 2020-06-09 22:24:59
 tags:
   - config
   - centos
-  - java
 ---
 
 ## systemd 启动 java 应用程序

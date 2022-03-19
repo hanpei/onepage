@@ -22,7 +22,7 @@ impl IndexPage {
     }
 
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
-        print!(" ▶️ Loading index ...");
+        println!("🏃🏻 Loading index page ...");
 
         let raw_content = std::fs::read_to_string(path.as_ref().join("index.md"))?;
         let title = raw_content.lines().next().unwrap().to_string();

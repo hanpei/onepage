@@ -19,7 +19,7 @@ impl LoadSourceFile for Posts {
      * Load posts from a dictionary.
      */
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
-        print!(" ▶️ Loading posts ...");
+        println!("🏃🏻 Loading posts ...");
 
         let mut posts = Vec::new();
         walkdir::WalkDir::new(path)
@@ -50,25 +50,6 @@ impl DerefMut for Posts {
         &mut self.inner
     }
 }
-// /**
-//  * Load posts from a dictionary.
-//  */
-// pub fn load_posts<P: AsRef<Path>>(posts_dir: P) -> Result<Vec<Post>> {
-//     let mut posts = Vec::new();
-//     walkdir::WalkDir::new(posts_dir)
-//         .into_iter()
-//         .filter_map(|e| e.ok())
-//         .filter(|e| e.file_type().is_file())
-//         .filter(|e| e.path().display().to_string().ends_with(".md"))
-//         .for_each(|e| match Post::load(e.path()) {
-//             Ok(p) => posts.push(p),
-//             Err(e) => {
-//                 println!("load posts error:  {}", e);
-//             }
-//         });
-
-//     Ok(posts)
-// }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Post {

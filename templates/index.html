@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %}
-<header>
+<header class="container">
   <h1>{{title}}</h1>
   <div class="info">
     <img
@@ -14,7 +14,7 @@
     </div>
   </div>
 </header>
-<main>
+<main class="container">
   <section>{{content}}</section>
   {% if post_index %}
   <h3>Blog</h3>

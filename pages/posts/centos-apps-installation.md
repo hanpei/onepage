@@ -187,12 +187,12 @@ sudo systemctl status nginx
 #下载fedora的epel仓库
 yum install epel-release
 # 安装redis数据库
-yum install redis ```
+yum install redis```
 
 ### 启动
 ```bash
 # 常见命令介绍
-systemctl start redis #启动服务 
+systemctl start redis #启动服务
 systemctl stop redis  #停止服务
 systemctl restart redis  #重启服务
 systemctl status redis   #查看服务状态

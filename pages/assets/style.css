@@ -109,3 +109,12 @@ footer > [role='link']:is([aria-current], :hover, :active, :focus) {
   flex: 1;
   margin-left: 1rem;
 }
+
+.iconfont.icon-moon {
+  cursor: pointer;
+  color: #bbc6ce;
+}
+.iconfont.icon-sun {
+  cursor: pointer;
+  color: #415462;
+}
