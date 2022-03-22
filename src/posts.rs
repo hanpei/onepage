@@ -8,13 +8,23 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{markdown::parse_md_to_html, LoadSourceFile, PAGE_DIR};
+use crate::{builder::LoadSourceFile, markdown::parse_md_to_html, PAGE_DIR};
 
 pub struct Posts {
     inner: Vec<Post>,
 }
+
+impl Posts {
+    pub fn new(inner: Vec<Post>) -> Self {
+        Self { inner }
+    }
+    pub fn into_inner(&self) -> &Vec<Post> {
+        &self.inner
+    }
+}
+
 impl LoadSourceFile for Posts {
-    type Item = Vec<Post>;
+    type Item = Self;
     /**
      * Load posts from a dictionary.
      */
@@ -34,7 +44,7 @@ impl LoadSourceFile for Posts {
                 }
             });
 
-        Ok(posts)
+        Ok(Posts::new(posts))
     }
 }
 
@@ -131,12 +141,12 @@ mod tests {
     #[test]
     fn test_load_posts() {
         let posts = Posts::load("pages/posts").unwrap();
-        assert_eq!(posts.len(), 3);
+        assert_eq!(posts.len(), 6);
     }
 
     #[test]
     fn test_load_post() {
-        let post = Post::load("pages/posts/test.md").unwrap();
+        let post = Post::load("pages/posts/markdown.md").unwrap();
         println!("{:#?}", post);
     }
 

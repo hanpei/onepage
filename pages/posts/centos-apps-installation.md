@@ -6,6 +6,8 @@ tags:
   - setup
 ---
 
+# centos 服务器各种应用安装
+
 - java
 - mysql
 - yum 源更换镜像
