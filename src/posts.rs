@@ -139,7 +139,7 @@ mod tests {
     #[test]
     fn test_load_posts() {
         let posts = Posts::load("pages/posts").unwrap();
-        assert_eq!(posts.len(), 6);
+        assert_eq!(posts.len(), 3);
     }
 
     #[test]
