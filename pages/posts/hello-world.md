@@ -7,3 +7,5 @@ tags:
 ---
 
 # hello world
+
+![cat](../image/cat.jpg)

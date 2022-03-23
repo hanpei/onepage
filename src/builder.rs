@@ -7,7 +7,7 @@ use std::{
 use crate::{
     index::IndexPage,
     posts::{PostIndex, Posts},
-    templates, INDEX_TEMPLATE, OUTPUT_PATH, PAGE_DIR, POSTS_DIR, POST_TEMPLATE,
+    templates, INDEX_TEMPLATE, OUTPUT_PATH, PAGE_DIR, POSTS_DIR, POST_TEMPLATE, STATIC_PATH,
 };
 
 pub trait LoadSourceFile {
@@ -16,7 +16,8 @@ pub trait LoadSourceFile {
 }
 
 pub struct SiteBuilder {
-    pub base_path: PathBuf,
+    pub page_path: PathBuf,
+    pub static_path: PathBuf,
     pub index: IndexPage,
     pub posts: Posts,
 }
@@ -25,7 +26,8 @@ impl Default for SiteBuilder {
     fn default() -> Self {
         let path = Path::new(PAGE_DIR);
         Self {
-            base_path: PAGE_DIR.into(),
+            page_path: PAGE_DIR.into(),
+            static_path: STATIC_PATH.into(),
             index: IndexPage::load(path).expect("loading index page error"),
             posts: Posts::load(path.join(POSTS_DIR)).expect("loading posts error"),
         }
@@ -39,15 +41,16 @@ impl SiteBuilder {
         println!("🏃🏻 Loading index page ...");
         let index = IndexPage::load(path.as_ref()).expect("loading index page error");
         Self {
-            base_path: path.as_ref().to_path_buf(),
+            page_path: path.as_ref().to_path_buf(),
+            static_path: STATIC_PATH.into(),
             index,
             posts,
         }
     }
 
     pub fn rebuild(&mut self) -> Result<()> {
-        self.posts = Posts::load(self.base_path.join(POSTS_DIR)).expect("loading posts error");
-        self.index = IndexPage::load(self.base_path.as_path()).expect("loading index page error");
+        self.posts = Posts::load(self.page_path.join(POSTS_DIR)).expect("loading posts error");
+        self.index = IndexPage::load(self.page_path.as_path()).expect("loading index page error");
         fs::remove_dir_all(OUTPUT_PATH)?;
         fs::create_dir_all(OUTPUT_PATH)?;
         self.build_posts()?;
@@ -90,6 +93,18 @@ impl SiteBuilder {
             std::fs::write(output, rendered)?;
         }
 
+        walkdir::WalkDir::new(self.page_path.join("image"))
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .for_each(|e| {
+                let input = e.path();
+                let output = PathBuf::from(OUTPUT_PATH).join(input.strip_prefix(PAGE_DIR).unwrap());
+
+                fs::create_dir_all(output.parent().unwrap()).unwrap();
+                fs::copy(input, output).unwrap();
+            });
+
         Ok(())
     }
 
@@ -117,8 +132,7 @@ impl SiteBuilder {
     }
 
     fn build_assets(&mut self) -> Result<()> {
-        let input = self.base_path.join("assets");
-        let output = PathBuf::from(OUTPUT_PATH);
+        let input = self.static_path.join("assets");
 
         walkdir::WalkDir::new(input)
             .into_iter()
@@ -126,9 +140,10 @@ impl SiteBuilder {
             .filter(|e| e.file_type().is_file())
             .for_each(|e| {
                 let input = e.path();
-                let output = output.join(input.strip_prefix(PAGE_DIR).unwrap());
-                // println!("\tinput\t - {}", input.display());
-                // println!("\t- {}", output.display());
+                let output =
+                    PathBuf::from(OUTPUT_PATH).join(input.strip_prefix(STATIC_PATH).unwrap());
+                // println!("\tbuild_assetsinput\t - {}", input.display());
+                // println!("\tbuild_assets- {}", output.display());
 
                 fs::create_dir_all(output.parent().unwrap()).unwrap();
                 fs::copy(input, output).unwrap();
@@ -139,7 +154,7 @@ impl SiteBuilder {
 
     fn build_favicon(&mut self) -> Result<()> {
         // copy ico and favicon
-        let input = self.base_path.join("favicon");
+        let input = self.static_path.join("favicon");
 
         let output = PathBuf::from(OUTPUT_PATH);
 
@@ -150,7 +165,6 @@ impl SiteBuilder {
             .for_each(|e| {
                 let input = e.path();
                 let output = output.join(input.file_name().unwrap());
-
                 fs::copy(input, output).unwrap();
             });
         Ok(())

@@ -24,9 +24,11 @@ clone this repo, and:
 - `/pages`: markdown source file
   - `index.md` => _index page_
   - `/posts/*.md` => _post page_
-  - `/assets` img/css ...
+  - `/image` images used in markdown file
+- `/dist`: generated site
+- `/static`: static resources
+  - `/assets`: img/css/font
   - `/favicon` favicon files
-- `/dist`: static stie pages
 - `/src`: rust src
 
 ### Todo

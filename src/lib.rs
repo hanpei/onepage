@@ -8,6 +8,7 @@ pub use builder::*;
 pub use server::*;
 
 pub const BASE_PATH: &str = ".";
+pub const STATIC_PATH: &str = "static";
 pub const PAGE_DIR: &str = "pages";
 pub const POSTS_DIR: &str = "posts";
 pub const POST_TEMPLATE: &str = "post.html";

@@ -78,19 +78,17 @@ body > header {
 footer {
   vertical-align: middle;
 }
+footer > svg {
+  vertical-align: middle;
+}
 
 footer > small {
   margin-left: 0.5rem;
   color: var(--muted-color);
 }
 
-footer > a,
-footer > [role='link'] {
-  --color: var(--secondary);
-}
-footer > a:is([aria-current], :hover, :active, :focus),
-footer > [role='link']:is([aria-current], :hover, :active, :focus) {
-  --color: var(--secondary-hover);
+footer .secondary {
+  background: transparent;
   text-decoration: none;
 }
 
