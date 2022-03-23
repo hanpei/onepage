@@ -1,8 +1,11 @@
+# ONEPAGE
+
 ### Overview
 
-try to write a static site genertor, convert md posts to html.
+A simple static site genertor, convert md posts to html.
 
-`cargo run` to build pages
+`cargo run -- build` to build pages
+`cargo run -- serve` to build pages
 
 - Read /pages markdown files
 - Parse md to html by [pulldown cmark](https://docs.rs/pulldown-cmark/latest/pulldown_cmark/)
@@ -14,15 +17,18 @@ try to write a static site genertor, convert md posts to html.
 - `/pages`: markdown source file
   - `index.md` => _index page_
   - `/posts/*.md` => _post page_
+  - `/assets` img/css ...
+  - `/favicon` favicon files
 - `/dist`: static stie pages
 - `/src`: rust src
 
 ### todo
 
-- [ ] css style
-- [ ] add command line
-- [ ] serve /dist
-- [ ] watch /pages and rebuild
+- [ ] site init
+- [x] css style
+- [x] add command line
+- [x] serve /dist
+- [x] watch /pages and rebuild
 
 ### reference
 

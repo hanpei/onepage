@@ -800,6 +800,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "87f3e037eac156d1775da914196f0f37741a274155e34a0b7e427c35d2a2ecb9"
 
 [[package]]
+name = "onepage"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "chrono",
+ "clap",
+ "gray_matter",
+ "hotwatch",
+ "lazy_static",
+ "notify",
+ "pulldown-cmark",
+ "serde",
+ "serde_json",
+ "tera",
+ "tokio",
+ "tower-http",
+ "walkdir",
+]
+
+[[package]]
 name = "opaque-debug"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1620,27 +1641,6 @@ checksum = "d59cefebd0c892fa2dd6de581e937301d8552cb44489cdff035c6187cb63fa5e"
 dependencies = [
  "winapi 0.2.8",
  "winapi-build",
-]
-
-[[package]]
-name = "xpages"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "chrono",
- "clap",
- "gray_matter",
- "hotwatch",
- "lazy_static",
- "notify",
- "pulldown-cmark",
- "serde",
- "serde_json",
- "tera",
- "tokio",
- "tower-http",
- "walkdir",
 ]
 
 [[package]]

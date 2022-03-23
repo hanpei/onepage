@@ -34,7 +34,9 @@ impl Default for SiteBuilder {
 
 impl SiteBuilder {
     pub fn new<P: AsRef<Path>>(path: P) -> Self {
+        println!("🏃🏻 Loading posts ...");
         let posts = Posts::load(path.as_ref().join(POSTS_DIR)).expect("loading posts error");
+        println!("🏃🏻 Loading index page ...");
         let index = IndexPage::load(path.as_ref()).expect("loading index page error");
         Self {
             base_path: path.as_ref().to_path_buf(),
@@ -46,7 +48,14 @@ impl SiteBuilder {
     pub fn rebuild(&mut self) -> Result<()> {
         self.posts = Posts::load(self.base_path.join(POSTS_DIR)).expect("loading posts error");
         self.index = IndexPage::load(self.base_path.as_path()).expect("loading index page error");
-        self.build()?;
+        fs::remove_dir_all(OUTPUT_PATH)?;
+        fs::create_dir_all(OUTPUT_PATH)?;
+        self.build_posts()?;
+        self.build_index()?;
+        self.build_assets()?;
+        self.build_favicon()?;
+        println!("✅ Build success.");
+        println!();
 
         Ok(())
     }

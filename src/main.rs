@@ -1,12 +1,14 @@
 use anyhow::Result;
 use clap::Command;
-use xpages::SiteServer;
+use onepage::SiteServer;
 
 fn main() -> Result<(), anyhow::Error> {
-    let matches = Command::new("xpages")
+    let matches = Command::new("onepage")
         .version("0.1.0")
         .author("hanpei")
-        .about("A static site generator")
+        .arg_required_else_help(true)
+        .subcommand_required(true)
+        .about("A simple static site generator")
         .subcommand(Command::new("build").about("Build the site"))
         .subcommand(Command::new("serve").about("Serve the site"))
         .get_matches();

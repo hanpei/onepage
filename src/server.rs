@@ -1,13 +1,7 @@
 use anyhow::Result;
 use axum::{http::StatusCode, routing::get_service, Router};
 use notify::{RecommendedWatcher, Watcher};
-use std::{
-    net::SocketAddr,
-    path::{Path, PathBuf},
-    sync::mpsc,
-    thread,
-    time::Duration,
-};
+use std::{net::SocketAddr, sync::mpsc, thread, time::Duration};
 use tower_http::services::ServeDir;
 
 use crate::{SiteBuilder, OUTPUT_PATH, PAGE_DIR};
@@ -34,28 +28,23 @@ impl SiteServer {
         SiteServer { host, port }
     }
 
-    pub fn run(&mut self) -> Result<()> {
-        let addr = format!("{}:{}", self.host, self.port).parse::<SocketAddr>()?;
-        // let thread_handle = std::thread::spawn(move || {
-        // });
-        serve(addr).unwrap();
+    pub fn run(self) -> Result<()> {
+        let mut site = SiteBuilder::new(PAGE_DIR);
+        site.build()?;
 
-        // let _ = thread_handle.join();
+        let addr = format!("{}:{}", self.host, self.port).parse::<SocketAddr>()?;
+        thread::spawn(move || {
+            serve(addr).unwrap();
+        });
+
+        watch(&mut site);
+
         Ok(())
     }
 }
 
 #[tokio::main]
 async fn serve(address: SocketAddr) -> Result<()> {
-    let mut site = SiteBuilder::new(PAGE_DIR);
-    site.build()?;
-    tokio::task::spawn_blocking(move || {
-        watch(&mut site);
-        loop {
-            thread::sleep(Duration::from_secs(1));
-        }
-    });
-
     let app = Router::new().nest(
         "/",
         get_service(ServeDir::new(OUTPUT_PATH)).handle_error(|error: std::io::Error| async move {
@@ -66,7 +55,7 @@ async fn serve(address: SocketAddr) -> Result<()> {
         }),
     );
 
-    println!("Serving site on {}", address);
+    println!("Serving site on {}\n\n", address);
     axum::Server::bind(&address)
         .serve(app.into_make_service())
         .await?;
@@ -97,7 +86,7 @@ pub fn watch(site: &mut SiteBuilder) {
                         .nth(1)
                         .map(|path| {
                             println!("File changed, {:?}", path);
-                            println!("Rebuilding site");
+                            println!("Rebuilding site...");
                         });
                     site.rebuild().expect("Site rebuild failed");
                 }

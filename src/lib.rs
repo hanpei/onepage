@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 mod builder;
 mod index;
 mod markdown;
@@ -15,18 +13,3 @@ pub const POSTS_DIR: &str = "posts";
 pub const POST_TEMPLATE: &str = "post.html";
 pub const INDEX_TEMPLATE: &str = "index.html";
 pub const OUTPUT_PATH: &str = "dist";
-
-struct _SiteConfig {
-    name: String,
-
-    base_path: PathBuf,
-    output_path: PathBuf,
-}
-
-#[cfg(test)]
-mod tests {
-    use std::fs;
-
-    #[test]
-    fn directory() {}
-}
