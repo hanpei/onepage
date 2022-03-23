@@ -1,6 +1,6 @@
 use anyhow::Result;
-use clap::Command;
-use onepage::{SiteBuilder, SiteServer, PAGE_DIR};
+use clap::{Arg, Command};
+use onepage::{init, SiteBuilder, SiteServer, PAGE_DIR};
 
 fn main() -> Result<(), anyhow::Error> {
     let matches = Command::new("onepage")
@@ -9,11 +9,26 @@ fn main() -> Result<(), anyhow::Error> {
         .arg_required_else_help(true)
         .subcommand_required(true)
         .about("A simple static site generator")
+        .subcommand(
+            Command::new("init").about("Initialize the site").arg(
+                Arg::new("dir")
+                    .short('d')
+                    .long("dir")
+                    .value_name("DIR")
+                    .default_value("./onepage")
+                    .help("The directory to initilize the site"),
+            ),
+        )
         .subcommand(Command::new("build").about("Build the site"))
         .subcommand(Command::new("serve").about("Serve the site"))
         .get_matches();
 
     match matches.subcommand() {
+        Some(("init", arg_matches)) => {
+            let dir = arg_matches.value_of("dir").unwrap();
+            init(dir)?;
+            Ok(())
+        }
         Some(("build", _)) => {
             let mut site = SiteBuilder::new(PAGE_DIR);
             site.build()?;

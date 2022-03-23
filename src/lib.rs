@@ -1,10 +1,12 @@
 mod builder;
 mod index;
+mod init;
 mod markdown;
 mod posts;
 mod server;
 mod templates;
 pub use builder::*;
+pub use init::*;
 pub use server::*;
 
 pub const BASE_PATH: &str = ".";

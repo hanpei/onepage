@@ -26,3 +26,4 @@ tera = "1"
 tokio = {version = "1", features = ["full"]}
 tower-http = {version = "0.2", features = ["fs"]}
 walkdir = "2"
+fs_extra = "1"
