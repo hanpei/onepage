@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::Command;
-use onepage::SiteServer;
+use onepage::{SiteBuilder, SiteServer, PAGE_DIR};
 
 fn main() -> Result<(), anyhow::Error> {
     let matches = Command::new("onepage")
@@ -15,7 +15,9 @@ fn main() -> Result<(), anyhow::Error> {
 
     match matches.subcommand() {
         Some(("build", _)) => {
-            println!("Building site");
+            let mut site = SiteBuilder::new(PAGE_DIR);
+            site.build()?;
+
             Ok(())
         }
         Some(("serve", _)) => {
