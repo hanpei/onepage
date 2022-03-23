@@ -4,7 +4,6 @@ use onepage::{init, SiteBuilder, SiteServer, PAGE_DIR};
 
 fn main() -> Result<(), anyhow::Error> {
     let matches = Command::new("onepage")
-        .version("0.1.0")
         .author("hanpei")
         .arg_required_else_help(true)
         .subcommand_required(true)
