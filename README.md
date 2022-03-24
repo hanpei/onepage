@@ -15,9 +15,18 @@ A simple static site genertor, convert md posts to html.
 
 ### Usage
 
+#### from repo
+
 clone this repo, and:
 `cargo run -- build` to build pages
-`cargo run -- serve` to build pages
+`cargo run -- serve` to build pages, and make a server at localhost
+
+#### from cargo
+
+`cargo install onepage`
+`onepage init [dir]` : download template files from github
+`onepage serve`
+`onepage build`
 
 ### Structure
 
@@ -29,12 +38,13 @@ clone this repo, and:
 - `/static`: static resources
   - `/assets`: img/css/font
   - `/favicon` favicon files
+- `/templates`: html templates
 - `/src`: rust src
 
 ### Todo
 
-- [ ] site initialize to new path
-- [ ] site config file
+- [ ] custom site config file
+- [x] site initialize to new path
 - [x] css style
 - [x] add command line
 - [x] serve /dist
