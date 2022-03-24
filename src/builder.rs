@@ -17,7 +17,6 @@ pub trait LoadSourceFile {
 
 pub struct SiteBuilder {
     pub page_path: PathBuf,
-    pub static_path: PathBuf,
     pub index: IndexPage,
     pub posts: Posts,
 }
@@ -27,7 +26,6 @@ impl Default for SiteBuilder {
         let path = Path::new(PAGE_DIR);
         Self {
             page_path: PAGE_DIR.into(),
-            static_path: STATIC_PATH.into(),
             index: IndexPage::load(path).expect("loading index page error"),
             posts: Posts::load(path.join(POSTS_DIR)).expect("loading posts error"),
         }
@@ -42,7 +40,6 @@ impl SiteBuilder {
         let index = IndexPage::load(path.as_ref()).expect("loading index page error");
         Self {
             page_path: path.as_ref().to_path_buf(),
-            static_path: STATIC_PATH.into(),
             index,
             posts,
         }
@@ -64,7 +61,10 @@ impl SiteBuilder {
     }
 
     pub fn build(&mut self) -> Result<()> {
-        fs::remove_dir_all(OUTPUT_PATH)?;
+        // if exists output dir, remove it
+        if fs::metadata(OUTPUT_PATH).is_ok() {
+            fs::remove_dir_all(OUTPUT_PATH)?;
+        }
         fs::create_dir_all(OUTPUT_PATH)?;
 
         println!("🏃🏻 Building post pages...");
@@ -132,7 +132,7 @@ impl SiteBuilder {
     }
 
     fn build_assets(&mut self) -> Result<()> {
-        let input = self.static_path.join("assets");
+        let input = PathBuf::from(STATIC_PATH).join("assets");
 
         walkdir::WalkDir::new(input)
             .into_iter()
@@ -154,7 +154,7 @@ impl SiteBuilder {
 
     fn build_favicon(&mut self) -> Result<()> {
         // copy ico and favicon
-        let input = self.static_path.join("favicon");
+        let input = PathBuf::from(STATIC_PATH).join("favicon");
 
         let output = PathBuf::from(OUTPUT_PATH);
 

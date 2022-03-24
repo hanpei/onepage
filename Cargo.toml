@@ -27,3 +27,6 @@ tokio = {version = "1", features = ["full"]}
 tower-http = {version = "0.2", features = ["fs"]}
 walkdir = "2"
 fs_extra = "1"
+reqwest = {version = "0.11", features = ["blocking"]}
+tempfile = "3"
+zip = "0.6"

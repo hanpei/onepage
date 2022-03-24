@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Arg, Command};
-use onepage::{init, SiteBuilder, SiteServer, PAGE_DIR};
+use onepage::{init, SiteBuilder, SiteServer, PAGE_DIR, STARTER_TEMPLATE_URL};
 
 fn main() -> Result<(), anyhow::Error> {
     let matches = Command::new("onepage")
@@ -11,8 +11,6 @@ fn main() -> Result<(), anyhow::Error> {
         .subcommand(
             Command::new("init").about("Initialize the site").arg(
                 Arg::new("dir")
-                    .short('d')
-                    .long("dir")
                     .value_name("DIR")
                     .default_value("./onepage")
                     .help("The directory to initilize the site"),
@@ -25,7 +23,7 @@ fn main() -> Result<(), anyhow::Error> {
     match matches.subcommand() {
         Some(("init", arg_matches)) => {
             let dir = arg_matches.value_of("dir").unwrap();
-            init(dir)?;
+            init(dir, STARTER_TEMPLATE_URL)?;
             Ok(())
         }
         Some(("build", _)) => {
