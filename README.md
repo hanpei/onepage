@@ -41,9 +41,33 @@ clone this repo, and:
 - `/templates`: html templates
 - `/src`: rust src
 
+#### New post
+
+- make a `.md` file in `/pages/posts/`
+- you can copy from demo md files
+- at present, post page **must** have a fontmatter header, including `title`(required),`date`(required),`tags`(optional)
+
+```
+---
+title: hello world
+date: 2020-03-15 10:54:39
+---
+```
+
+```
+---
+title: hello world
+date: 2020-03-15 10:54:39
+tags:
+  - awesome-tag
+  - more-awesome-tag
+---
+```
+
 ### Todo
 
-- [ ] custom site config file
+- [ ] custom site config file (maybe not)
+- [ ] generate new page
 - [x] site initialize to new path
 - [x] css style
 - [x] add command line
