@@ -4,10 +4,11 @@ use std::{
     path::Path,
 };
 
-use crate::builder::LoadSourceFile;
+use crate::builder::LoadPage;
 
 use super::Post;
 
+#[derive(Debug)]
 pub struct Posts {
     inner: Vec<Post>,
 }
@@ -21,7 +22,7 @@ impl Posts {
     }
 }
 
-impl LoadSourceFile for Posts {
+impl LoadPage for Posts {
     type Item = Self;
     /**
      * Load posts from a dictionary.

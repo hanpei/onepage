@@ -4,7 +4,7 @@ use notify::{RecommendedWatcher, Watcher};
 use std::{net::SocketAddr, sync::mpsc, thread, time::Duration};
 use tower_http::services::ServeDir;
 
-use crate::{SiteBuilder, OUTPUT_PATH, PAGE_DIR};
+use crate::{SiteBuilder, OUTPUT_DIR, PAGE_DIR};
 
 pub struct SiteServer {
     host: String,
@@ -29,7 +29,7 @@ impl SiteServer {
     }
 
     pub fn run(self) -> Result<()> {
-        let mut site = SiteBuilder::new(PAGE_DIR);
+        let mut site = SiteBuilder::new();
         site.build()?;
 
         let addr = format!("{}:{}", self.host, self.port).parse::<SocketAddr>()?;
@@ -47,7 +47,7 @@ impl SiteServer {
 async fn serve(address: SocketAddr) -> Result<()> {
     let app = Router::new().nest(
         "/",
-        get_service(ServeDir::new(OUTPUT_PATH)).handle_error(|error: std::io::Error| async move {
+        get_service(ServeDir::new(OUTPUT_DIR)).handle_error(|error: std::io::Error| async move {
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Unhandled internal error: {}", error),

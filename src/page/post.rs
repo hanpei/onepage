@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 
-use crate::{markdown::parse_md_to_html, PAGE_DIR};
+use crate::{markdown::parse_md_to_html, LoadPage, PAGE_DIR};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Post {
@@ -50,8 +50,10 @@ impl Default for FrontMatter {
     }
 }
 
-impl Post {
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Post> {
+impl LoadPage for Post {
+    type Item = Post;
+
+    fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
         let raw_content = std::fs::read_to_string(&path)?;
         let (fm, md) = Self::read_front_matter(&raw_content);
         let title = fm.title.clone();
@@ -59,7 +61,7 @@ impl Post {
         let path = path.as_ref().strip_prefix(PAGE_DIR).unwrap().to_path_buf();
         Ok(Post {
             front_matter: fm,
-            path: path.to_owned(),
+            path: path.clone(),
             url: Path::new("/")
                 .join(path)
                 .with_extension("html")
@@ -69,7 +71,9 @@ impl Post {
             content,
         })
     }
+}
 
+impl Post {
     pub fn read_front_matter(content: &str) -> (FrontMatter, String) {
         let matter = Matter::<YAML>::new();
         let parsed = matter
