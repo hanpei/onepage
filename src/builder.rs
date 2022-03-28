@@ -1,81 +1,14 @@
 use anyhow::Result;
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::Path};
 
 use crate::{
     page::{IndexPage, PostIndex, Posts},
-    templates, INDEX_TEMPLATE, OUTPUT_DIR, PAGE_DIR, POSTS_DIR, POST_TEMPLATE, STATIC_DIR,
+    templates, Config, INDEX_TEMPLATE, POST_TEMPLATE,
 };
 
 pub trait LoadPage {
     type Item;
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item>;
-}
-
-#[derive(Debug)]
-pub struct Config {
-    page_dir: PathBuf,
-    static_dir: PathBuf,
-    output_dir: PathBuf,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            page_dir: PathBuf::from(PAGE_DIR),
-            static_dir: PathBuf::from(STATIC_DIR),
-            output_dir: PathBuf::from(OUTPUT_DIR),
-        }
-    }
-}
-
-impl Config {
-    pub fn get_page_posts_path(&self) -> PathBuf {
-        self.page_dir.join(POSTS_DIR)
-    }
-
-    pub fn get_output_posts_path(&self) -> PathBuf {
-        self.output_dir.join(POSTS_DIR)
-    }
-
-    pub fn get_page_index_path(&self) -> PathBuf {
-        self.page_dir.join("index.md")
-    }
-
-    pub fn get_page_image_path(&self) -> PathBuf {
-        self.page_dir.join("image")
-    }
-
-    /** image path:
-     * input:  /pages/images/xxx.png
-     * output: /dist/images/xxx.png
-     */
-    pub fn get_output_image_path(&self, input: &Path) -> PathBuf {
-        let path = input.strip_prefix(&self.page_dir).unwrap();
-        self.output_dir.join(path)
-    }
-
-    /** assets path:
-     *  input: /static/assets/xxx.css
-     *  output: /dist/assets/xxx.css
-     */
-    pub fn get_output_assets_path(&self, input: &Path) -> PathBuf {
-        let path = input.strip_prefix(&self.static_dir).unwrap();
-        self.output_dir.join(path)
-    }
-
-    /** favicon path:
-     *  input: /static/favicon/favicon.ico
-     *  output: /dist/favicon.ico
-     */
-    pub fn get_output_favicon_path(&self, input: &Path) -> PathBuf {
-        let path = input
-            .strip_prefix(&self.static_dir.join("favicon"))
-            .unwrap();
-        self.output_dir.join(path)
-    }
 }
 
 #[derive(Debug)]
@@ -199,45 +132,76 @@ impl SiteBuilder {
     }
 
     fn build_assets(&mut self) -> Result<()> {
-        let input = self.config.static_dir.join("assets");
-
-        walkdir::WalkDir::new(input)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .for_each(|e| {
-                let input = e.path();
-                let output = &self.config.get_output_assets_path(input);
-                fs::create_dir_all(output.parent().unwrap()).unwrap();
-                fs::copy(input, output).unwrap();
-            });
+        let src = self.config.static_dir.join("assets");
+        let dst = self.config.get_output_assets_path(&src);
+        copy_files(src.as_path(), dst.as_path()).unwrap();
 
         Ok(())
     }
 
     fn build_favicon(&mut self) -> Result<()> {
         // copy ico and favicon
-        let input = &self.config.static_dir.join("favicon");
-
-        walkdir::WalkDir::new(input)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .for_each(|e| {
-                let input = e.path();
-                let output = &self.config.get_output_favicon_path(input);
-                fs::copy(input, output).unwrap();
-            });
+        let src = self.config.static_dir.join("favicon");
+        let dst = self.config.get_output_favicon_path(&src);
+        copy_files(src.as_path(), dst.as_path())?;
         Ok(())
     }
 }
+
+fn copy_files(src: &Path, dst: &Path) -> Result<()> {
+    if src.is_dir() {
+        fs::create_dir_all(dst)?;
+        for entry in fs::read_dir(src)? {
+            let entry = entry?;
+            let src = entry.path();
+            let dst = dst.join(src.file_name().unwrap());
+            copy_files(&src, &dst)?;
+        }
+    } else {
+        fs::copy(src, dst)?;
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn clear_output_dir() {
+        let output_dir = Config::default().output_dir;
+        if fs::metadata(&output_dir).is_ok() {
+            fs::remove_dir_all(&output_dir).unwrap();
+        }
+    }
+
     #[test]
-    fn site_builder_test() {
-        let mut page = SiteBuilder::new();
-        println!("{:?}", page);
+    fn test_build() {
+        let mut site = SiteBuilder::new();
+        assert!(site.build().is_ok());
+    }
+
+    #[test]
+    fn copy_assets_test() {
+        // assets
+        clear_output_dir();
+        let mut site = SiteBuilder::new();
+        site.build_assets().unwrap();
+        let src = site.config.static_dir.join("assets");
+        let dst = site.config.get_output_assets_path(&src);
+        let input_files = fs::read_dir(src).unwrap().count();
+        let output_files = fs::read_dir(dst).unwrap().count();
+        assert_eq!(input_files, output_files);
+    }
+
+    #[test]
+    fn copy_files_test() {
+        clear_output_dir();
+        let config = Config::default();
+        let src = &config.static_dir.join("assets");
+        let dst = &config.get_output_assets_path(&src);
+        copy_files(src.as_path(), dst.as_path()).unwrap();
+        let input_files = fs::read_dir(src).unwrap().count();
+        let output_files = fs::read_dir(dst).unwrap().count();
+        assert_eq!(input_files, output_files);
     }
 }
