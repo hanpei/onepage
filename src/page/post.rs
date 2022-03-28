@@ -1,63 +1,11 @@
 use anyhow::Result;
-use chrono::Local;
 use gray_matter::{engine::YAML, Matter};
-use std::{
-    ops::{Deref, DerefMut},
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
+use chrono::Local;
 use serde::{Deserialize, Serialize};
 
-use crate::{builder::LoadSourceFile, markdown::parse_md_to_html, PAGE_DIR};
-
-pub struct Posts {
-    inner: Vec<Post>,
-}
-
-impl Posts {
-    pub fn new(inner: Vec<Post>) -> Self {
-        Self { inner }
-    }
-    pub fn into_inner(&self) -> &Vec<Post> {
-        &self.inner
-    }
-}
-
-impl LoadSourceFile for Posts {
-    type Item = Self;
-    /**
-     * Load posts from a dictionary.
-     */
-    fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
-        let mut posts = Vec::new();
-        walkdir::WalkDir::new(path)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .filter(|e| e.path().display().to_string().ends_with(".md"))
-            .for_each(|e| match Post::load(e.path()) {
-                Ok(p) => posts.push(p),
-                Err(e) => {
-                    println!("load posts error:  {}", e);
-                }
-            });
-
-        Ok(Posts::new(posts))
-    }
-}
-
-impl Deref for Posts {
-    type Target = Vec<Post>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-impl DerefMut for Posts {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
+use crate::{markdown::parse_md_to_html, PAGE_DIR};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Post {
@@ -134,13 +82,8 @@ impl Post {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
-    #[test]
-    fn test_load_posts() {
-        let posts = Posts::load("pages/posts").unwrap();
-        assert_eq!(posts.len(), 3);
-    }
+    use super::*;
 
     #[test]
     fn test_load_post() {

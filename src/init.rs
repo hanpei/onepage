@@ -21,6 +21,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn it_workd() {
         init(
             "temp",

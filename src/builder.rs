@@ -5,8 +5,7 @@ use std::{
 };
 
 use crate::{
-    index::IndexPage,
-    posts::{PostIndex, Posts},
+    page::{IndexPage, PostIndex, Posts},
     templates, INDEX_TEMPLATE, OUTPUT_PATH, PAGE_DIR, POSTS_DIR, POST_TEMPLATE, STATIC_PATH,
 };
 
@@ -177,6 +176,5 @@ mod tests {
     #[test]
     fn walk_assets_dir() {
         let mut page = SiteBuilder::new("pages");
-        page.build_assets().unwrap();
     }
 }

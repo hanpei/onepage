@@ -3,7 +3,9 @@ use std::path::Path;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::{markdown::parse_md_to_html, posts::PostIndex};
+use crate::markdown::parse_md_to_html;
+
+use super::PostIndex;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct IndexPage {

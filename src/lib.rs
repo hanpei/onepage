@@ -1,8 +1,8 @@
 mod builder;
-mod index;
 mod init;
 mod markdown;
-mod posts;
+mod page;
+
 mod server;
 mod templates;
 pub use builder::*;
