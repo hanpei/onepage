@@ -13,6 +13,7 @@ pub fn parse_md_to_html(markdown_input: &str) -> String {
     let parser = Parser::new_ext(markdown_input, options);
     let parser = parser.map(|event| match event {
         Event::Start(tag) => {
+            // convert image src to absolute path
             if let Tag::Image(a, url, b) = tag {
                 let u = url.replace("../image", "/image");
                 Event::Start(Tag::Image(a, u.into(), b))

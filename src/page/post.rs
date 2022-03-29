@@ -84,9 +84,7 @@ impl Post {
         match matter.parse_with_struct::<FrontMatter>(content) {
             Some(parsed) => Ok((parsed.data, parsed.content)),
             None => bail!(
-                r#"
-Invalid front matter found in {}", 
-font matter details:[ https://github.com/hanpei/onepage#new-post ]"#,
+                "Invalid front matter found in {},\ncheck the font matter details:[ https://github.com/hanpei/onepage#new-post ]",
                 path.as_ref().display(),
             ),
         }

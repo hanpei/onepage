@@ -2,7 +2,7 @@ use anyhow::Result;
 use std::{fs, path::Path};
 
 use crate::{
-    page::{IndexPage, PostIndex, Posts},
+    page::{IndexPage, Posts},
     templates, Config, INDEX_TEMPLATE, POST_TEMPLATE,
 };
 
@@ -23,12 +23,12 @@ impl SiteBuilder {
         let config = Config::default();
         println!("🏃🏻 Loading posts ...");
         let posts = Posts::load(config.get_page_posts_path()).unwrap_or_else(|e| {
-            println!("\n\n💥 Failed to load posts: \n\t{}\n\n", e);
+            println!("\n\n💥 Failed to load \"pages/posts/...\": \n{}\n\n", e);
             std::process::exit(1);
         });
         println!("🏃🏻 Loading index page ...");
         let index = IndexPage::load(config.get_page_index_path()).unwrap_or_else(|e| {
-            println!("\n💥 Failed to load index page: {}\n\n", e);
+            println!("\n💥 Failed to load \"pages/index.md\" page: \n{}\n\n", e);
             std::process::exit(1);
         });
 
@@ -107,21 +107,8 @@ impl SiteBuilder {
         Ok(())
     }
 
-    fn crate_post_index(&mut self) -> Vec<PostIndex> {
-        // println!("🏃🏻 Create post index ...");
-
-        let mut post_index = self
-            .posts
-            .iter()
-            .map(|post| post.into())
-            .collect::<Vec<PostIndex>>();
-        post_index.sort_by(|a, b| b.date.cmp(&a.date));
-        // println!("\t- {} post index created.", post_index.len());
-        post_index
-    }
-
     fn build_index(&mut self) -> Result<()> {
-        let post_index = self.crate_post_index();
+        let post_index = self.posts.get_post_index();
         self.index.set_post_index(post_index);
         let rendered = templates::render_template(INDEX_TEMPLATE, &self.index)?;
         let output = self.config.output_dir.join("index.html");

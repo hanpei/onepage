@@ -6,7 +6,7 @@ use std::{
 
 use crate::builder::LoadPage;
 
-use super::Post;
+use super::{Post, PostIndex};
 
 #[derive(Debug)]
 pub struct Posts {
@@ -19,6 +19,16 @@ impl Posts {
     }
     pub fn into_inner(&self) -> &Vec<Post> {
         &self.inner
+    }
+
+    pub fn get_post_index(&mut self) -> Vec<PostIndex> {
+        let mut post_index = self
+            .inner
+            .iter()
+            .map(|post| post.into())
+            .collect::<Vec<PostIndex>>();
+        post_index.sort_by(|a, b| b.date.cmp(&a.date));
+        post_index
     }
 }
 
@@ -53,6 +63,7 @@ impl Deref for Posts {
         &self.inner
     }
 }
+
 impl DerefMut for Posts {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
@@ -68,5 +79,18 @@ mod tests {
     fn test_load_posts() {
         let posts = Posts::load("pages/posts").unwrap();
         assert_eq!(posts.len(), 4);
+        let paths = posts
+            .iter()
+            .map(|p| p.path.display().to_string())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            paths,
+            vec![
+                "posts/markdown.md",
+                "posts/hello-world.md",
+                "posts/syntax-demo.md",
+                "posts/test.md"
+            ]
+        );
     }
 }
