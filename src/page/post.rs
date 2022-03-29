@@ -1,8 +1,8 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
+use chrono::Local;
 use gray_matter::{engine::YAML, Matter};
 use std::path::{Path, PathBuf};
 
-use chrono::Local;
 use serde::{Deserialize, Serialize};
 
 use crate::{markdown::parse_md_to_html, LoadPage, PAGE_DIR};
@@ -55,7 +55,9 @@ impl LoadPage for Post {
 
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
         let raw_content = std::fs::read_to_string(&path)?;
-        let (fm, md) = Self::read_front_matter(&raw_content);
+
+        let (fm, md) = Self::read_front_matter(&raw_content, &path)?;
+
         let title = fm.title.clone();
         let content = parse_md_to_html(&md);
         let path = path.as_ref().strip_prefix(PAGE_DIR).unwrap().to_path_buf();
@@ -74,13 +76,20 @@ impl LoadPage for Post {
 }
 
 impl Post {
-    pub fn read_front_matter(content: &str) -> (FrontMatter, String) {
+    pub fn read_front_matter<P: AsRef<Path>>(
+        content: &str,
+        path: P,
+    ) -> Result<(FrontMatter, String)> {
         let matter = Matter::<YAML>::new();
-        let parsed = matter
-            .parse_with_struct::<FrontMatter>(content)
-            .expect("invalid front matter");
-
-        (parsed.data, parsed.content)
+        match matter.parse_with_struct::<FrontMatter>(content) {
+            Some(parsed) => Ok((parsed.data, parsed.content)),
+            None => bail!(
+                r#"
+Invalid front matter found in {}", 
+font matter details:[ https://github.com/hanpei/onepage#new-post ]"#,
+                path.as_ref().display(),
+            ),
+        }
     }
 }
 
@@ -91,43 +100,68 @@ mod tests {
 
     #[test]
     fn test_load_post() {
-        let post = Post::load("pages/posts/markdown.md").unwrap();
-        println!("{:#?}", post);
+        let post = Post::load("pages/posts/test.md").unwrap();
+        assert_eq!(post.front_matter.title, "Page for test");
+        assert_eq!(post.front_matter.tags.unwrap(), ["draft"]);
+        assert_eq!(post.front_matter.date, "2022-03-29 12:00");
+
+        assert_eq!(post.title, "Page for test");
+        assert_eq!(post.content, "<h1>Test</h1>\n<p>this is content</p>\n");
+        assert_eq!(post.url, "/posts/test.html");
+        assert_eq!(post.path, PathBuf::from("posts/test.md"));
     }
 
     #[test]
-    fn front_matter() {
+    fn valid_front_matter() {
         let content = r#"---
 title: "test"
-tags: ["test"]
+tags: 
+        - "test"
+        - "test2"  
 date: "2020-01-01 00:00:00"
 ---
 # test
 is test
 "#;
-        let (matter, _) = Post::read_front_matter(&content);
-        println!("{:#?}", matter);
+        let (matter, _) = Post::read_front_matter(&content, "path/demo.md").unwrap();
         assert_eq!(matter.title, "test");
-        assert_eq!(matter.tags.unwrap(), ["test"]);
+        assert_eq!(matter.tags.unwrap(), ["test", "test2"]);
         assert_eq!(matter.date, "2020-01-01 00:00:00");
     }
 
     #[test]
-    #[should_panic(expected = "invalid front matter")]
-    fn empty_front_matter() {
-        let content = "";
-        let (matter, _) = Post::read_front_matter(&content);
-        assert_eq!(matter.title, FrontMatter::default().title);
+    fn empty_tag_front_matter() {
+        let content = r#"---
+title: "test"
+date: "2020-01-01 00:00:00"
+---
+"#;
+        let (matter, _) = Post::read_front_matter(&content, "path/demo.md").unwrap();
+        assert_eq!(matter.title, "test");
+        assert_eq!(matter.date, "2020-01-01 00:00:00");
+        assert!(matter.tags.is_none());
     }
 
     #[test]
-    #[should_panic(expected = "invalid front matter")]
+    #[should_panic]
     fn invalid_front_matter() {
         let content = r#"---
         name: "name"
         ---
         this is content
         "#;
-        Post::read_front_matter(&content);
+        let post = Post::read_front_matter(&content, "path/demo.md");
+        assert!(post.is_err());
+        post.unwrap();
+    }
+
+    #[test]
+    fn empty_front_matter() {
+        let content = r#"---
+        ---
+        this is content
+        "#;
+        let post = Post::read_front_matter(&content, "path/demo.md");
+        assert!(post.is_err());
     }
 }

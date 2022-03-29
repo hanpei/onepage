@@ -29,17 +29,18 @@ impl LoadPage for Posts {
      */
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
         let mut posts = Vec::new();
-        walkdir::WalkDir::new(path)
+        let files = walkdir::WalkDir::new(path)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
             .filter(|e| e.path().display().to_string().ends_with(".md"))
-            .for_each(|e| match Post::load(e.path()) {
-                Ok(p) => posts.push(p),
-                Err(e) => {
-                    println!("load posts error:  {}", e);
-                }
-            });
+            .map(|e| e.path().to_path_buf())
+            .collect::<Vec<_>>();
+
+        for file in files {
+            let post = Post::load(file)?;
+            posts.push(post);
+        }
 
         Ok(Posts::new(posts))
     }

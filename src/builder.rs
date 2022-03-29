@@ -22,10 +22,15 @@ impl SiteBuilder {
     pub fn new() -> Self {
         let config = Config::default();
         println!("🏃🏻 Loading posts ...");
-        let posts = Posts::load(config.get_page_posts_path()).expect("loading posts error");
+        let posts = Posts::load(config.get_page_posts_path()).unwrap_or_else(|e| {
+            println!("\n\n💥 Failed to load posts: \n\t{}\n\n", e);
+            std::process::exit(1);
+        });
         println!("🏃🏻 Loading index page ...");
-        let index =
-            IndexPage::load(config.get_page_index_path()).expect("loading index page error");
+        let index = IndexPage::load(config.get_page_index_path()).unwrap_or_else(|e| {
+            println!("\n💥 Failed to load index page: {}\n\n", e);
+            std::process::exit(1);
+        });
 
         Self {
             config,
@@ -178,19 +183,6 @@ mod tests {
     fn test_build() {
         let mut site = SiteBuilder::new();
         assert!(site.build().is_ok());
-    }
-
-    #[test]
-    fn copy_assets_test() {
-        // assets
-        clear_output_dir();
-        let mut site = SiteBuilder::new();
-        site.build_assets().unwrap();
-        let src = site.config.static_dir.join("assets");
-        let dst = site.config.get_output_assets_path(&src);
-        let input_files = fs::read_dir(src).unwrap().count();
-        let output_files = fs::read_dir(dst).unwrap().count();
-        assert_eq!(input_files, output_files);
     }
 
     #[test]

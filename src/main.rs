@@ -52,7 +52,7 @@ mod tests {
             .filter(|e| e.file_type().is_file())
             .filter(|e| e.path().display().to_string().ends_with(".md"))
             .for_each(|e| {
-                println!("====> {}", e.path().display());
+                println!("==== {}", e.path().display());
             });
     }
 }
