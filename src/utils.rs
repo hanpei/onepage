@@ -8,13 +8,12 @@ use std::{
  * get all file paths in a directory
  */
 pub fn get_files_by_walkdir<P: AsRef<Path>>(path: P) -> Vec<PathBuf> {
-    let files = walkdir::WalkDir::new(path)
+    walkdir::WalkDir::new(path)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
         .map(|e| e.path().to_path_buf())
-        .collect::<Vec<_>>();
-    files
+        .collect::<Vec<_>>()
 }
 
 /**

@@ -8,7 +8,7 @@ use crate::{builder::LoadPage, utils};
 
 use super::{Post, PostIndex};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Posts {
     inner: Vec<Post>,
 }

@@ -24,7 +24,7 @@ mod tests {
     #[ignore]
     fn it_workd() {
         init(
-            "temp",
+            "tmp/starter",
             "https://github.com/hanpei/onepage-starter/archive/refs/heads/main.zip",
         )
         .unwrap();

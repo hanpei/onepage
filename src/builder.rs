@@ -11,33 +11,11 @@ pub trait LoadPage {
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SiteBuilder {
     pub config: Config,
     pub index: IndexPage,
     pub posts: Posts,
-}
-
-impl Default for SiteBuilder {
-    fn default() -> Self {
-        let config = Config::default();
-        println!("🏃🏻 Loading posts ...");
-        let posts = Posts::load(config.get_page_posts_path()).unwrap_or_else(|e| {
-            println!("\n\n💥 Failed to load \"pages/posts/...\": \n{}\n\n", e);
-            std::process::exit(1);
-        });
-        println!("🏃🏻 Loading index page ...");
-        let index = IndexPage::load(config.get_page_index_path()).unwrap_or_else(|e| {
-            println!("\n💥 Failed to load \"pages/index.md\" page: \n{}\n\n", e);
-            std::process::exit(1);
-        });
-
-        Self {
-            config,
-            index,
-            posts,
-        }
-    }
 }
 
 impl SiteBuilder {
@@ -45,10 +23,24 @@ impl SiteBuilder {
         Self::default()
     }
 
+    pub fn load(&mut self) {
+        println!("🏃🏻 Loading posts ...");
+        let posts = Posts::load(self.config.get_page_posts_path()).unwrap_or_else(|e| {
+            println!("\n\n💥 Failed to load \"pages/posts/...\": \n{}\n\n", e);
+            std::process::exit(1);
+        });
+        println!("🏃🏻 Loading index page ...");
+        let index = IndexPage::load(self.config.get_page_index_path()).unwrap_or_else(|e| {
+            println!("\n💥 Failed to load \"pages/index.md\" page: \n{}\n\n", e);
+            std::process::exit(1);
+        });
+        self.posts = posts;
+        self.index = index;
+    }
+
     pub fn rebuild(&mut self) -> Result<()> {
-        self.posts = Posts::load(self.config.get_page_posts_path()).expect("loading posts error");
-        self.index =
-            IndexPage::load(self.config.get_page_index_path()).expect("loading index page error");
+        self.load();
+
         fs::remove_dir_all(&self.config.output_dir)?;
         fs::create_dir_all(&self.config.output_dir)?;
         self.build_posts()?;
@@ -61,6 +53,7 @@ impl SiteBuilder {
     }
 
     pub fn build(&mut self) -> Result<()> {
+        self.load();
         // if exists output dir, remove it
         if fs::metadata(&self.config.output_dir).is_ok() {
             fs::remove_dir_all(&self.config.output_dir)?;
@@ -141,6 +134,12 @@ impl SiteBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn default_site() {
+        let site = SiteBuilder::new();
+        println!("{:#?}", site);
+    }
 
     #[test]
     fn test_build() {

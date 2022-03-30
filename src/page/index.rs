@@ -7,7 +7,7 @@ use crate::{markdown::parse_md_to_html, LoadPage};
 
 use super::PostIndex;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub struct IndexPage {
     title: String,
     content: String,
