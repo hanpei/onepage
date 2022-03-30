@@ -22,7 +22,7 @@ impl Default for SiteServer {
 
 impl SiteServer {
     pub fn new(address: &str) -> Self {
-        let pairs = address.split(":").collect::<Vec<&str>>();
+        let pairs = address.split(':').collect::<Vec<&str>>();
         let host = pairs[0].to_string();
         let port = pairs[1].parse::<u16>().unwrap_or_default();
         SiteServer { host, port }
@@ -80,14 +80,10 @@ pub fn watch(site: &mut SiteBuilder) {
                 | hotwatch::Event::Write(path)
                 | hotwatch::Event::Remove(path)
                 | hotwatch::Event::Rename(path, _) => {
-                    path.display()
-                        .to_string()
-                        .split("pages")
-                        .nth(1)
-                        .map(|path| {
-                            println!("File changed, {:?}", path);
-                            println!("Rebuilding site...");
-                        });
+                    if let Some(path) = path.display().to_string().split("pages").nth(1) {
+                        println!("File changed: {:?}", path);
+                        println!("Rebuilding site...");
+                    }
                     site.rebuild().expect("Site rebuild failed");
                 }
                 _ => {}

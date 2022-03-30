@@ -6,6 +6,7 @@ mod markdown;
 mod page;
 mod server;
 mod templates;
+pub mod utils;
 
 pub use builder::*;
 pub use config::*;

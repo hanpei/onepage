@@ -29,7 +29,7 @@ impl LoadPage for IndexPage {
 }
 
 fn strip_hash_from_title(title: &str) -> String {
-    title.split("#").last().unwrap().trim().to_string()
+    title.split('#').last().unwrap().trim().to_string()
 }
 
 impl IndexPage {

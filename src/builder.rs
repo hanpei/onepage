@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 
 use crate::{
     page::{IndexPage, Posts},
-    templates, Config, INDEX_TEMPLATE, POST_TEMPLATE,
+    templates, utils, Config, INDEX_TEMPLATE, POST_TEMPLATE,
 };
 
 pub trait LoadPage {
@@ -18,8 +18,8 @@ pub struct SiteBuilder {
     pub posts: Posts,
 }
 
-impl SiteBuilder {
-    pub fn new() -> Self {
+impl Default for SiteBuilder {
+    fn default() -> Self {
         let config = Config::default();
         println!("🏃🏻 Loading posts ...");
         let posts = Posts::load(config.get_page_posts_path()).unwrap_or_else(|e| {
@@ -37,6 +37,12 @@ impl SiteBuilder {
             index,
             posts,
         }
+    }
+}
+
+impl SiteBuilder {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn rebuild(&mut self) -> Result<()> {
@@ -79,7 +85,7 @@ impl SiteBuilder {
         let output = self.config.get_output_posts_path();
         fs::create_dir_all(output)?;
 
-        for post in self.posts.into_inner() {
+        for post in self.posts.as_ref() {
             let rendered = templates::render_template(POST_TEMPLATE, post)?;
             let path = post.path.with_extension("html");
             let output = self.config.output_dir.join(path);
@@ -93,17 +99,9 @@ impl SiteBuilder {
     }
 
     fn copy_pages_image(&mut self) -> Result<()> {
-        walkdir::WalkDir::new(self.config.get_page_image_path())
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .for_each(|e| {
-                let input = e.path();
-                let output = &self.config.get_output_image_path(input);
-
-                fs::create_dir_all(output.parent().unwrap()).unwrap();
-                fs::copy(input, output).unwrap();
-            });
+        let src = self.config.get_page_image_path();
+        let dst = &self.config.get_output_image_path(&src);
+        utils::copy_files(src.as_path(), dst.as_path())?;
         Ok(())
     }
 
@@ -126,7 +124,7 @@ impl SiteBuilder {
     fn build_assets(&mut self) -> Result<()> {
         let src = self.config.static_dir.join("assets");
         let dst = self.config.get_output_assets_path(&src);
-        copy_files(src.as_path(), dst.as_path()).unwrap();
+        utils::copy_files(src.as_path(), dst.as_path()).unwrap();
 
         Ok(())
     }
@@ -135,52 +133,18 @@ impl SiteBuilder {
         // copy ico and favicon
         let src = self.config.static_dir.join("favicon");
         let dst = self.config.get_output_favicon_path(&src);
-        copy_files(src.as_path(), dst.as_path())?;
+        utils::copy_files(src.as_path(), dst.as_path())?;
         Ok(())
     }
-}
-
-fn copy_files(src: &Path, dst: &Path) -> Result<()> {
-    if src.is_dir() {
-        fs::create_dir_all(dst)?;
-        for entry in fs::read_dir(src)? {
-            let entry = entry?;
-            let src = entry.path();
-            let dst = dst.join(src.file_name().unwrap());
-            copy_files(&src, &dst)?;
-        }
-    } else {
-        fs::copy(src, dst)?;
-    }
-    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn clear_output_dir() {
-        let output_dir = Config::default().output_dir;
-        if fs::metadata(&output_dir).is_ok() {
-            fs::remove_dir_all(&output_dir).unwrap();
-        }
-    }
-
     #[test]
     fn test_build() {
         let mut site = SiteBuilder::new();
         assert!(site.build().is_ok());
-    }
-
-    #[test]
-    fn copy_files_test() {
-        clear_output_dir();
-        let config = Config::default();
-        let src = &config.static_dir.join("assets");
-        let dst = &config.get_output_assets_path(&src);
-        copy_files(src.as_path(), dst.as_path()).unwrap();
-        let input_files = fs::read_dir(src).unwrap().count();
-        let output_files = fs::read_dir(dst).unwrap().count();
-        assert_eq!(input_files, output_files);
     }
 }

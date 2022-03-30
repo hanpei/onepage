@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use crate::builder::LoadPage;
+use crate::{builder::LoadPage, utils};
 
 use super::{Post, PostIndex};
 
@@ -17,7 +17,8 @@ impl Posts {
     pub fn new(inner: Vec<Post>) -> Self {
         Self { inner }
     }
-    pub fn into_inner(&self) -> &Vec<Post> {
+
+    pub fn inner(&self) -> &Vec<Post> {
         &self.inner
     }
 
@@ -39,12 +40,9 @@ impl LoadPage for Posts {
      */
     fn load<P: AsRef<Path>>(path: P) -> Result<Self::Item> {
         let mut posts = Vec::new();
-        let files = walkdir::WalkDir::new(path)
+        let files = utils::get_files_by_walkdir(path)
             .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .filter(|e| e.path().display().to_string().ends_with(".md"))
-            .map(|e| e.path().to_path_buf())
+            .filter(|e| e.display().to_string().ends_with(".md"))
             .collect::<Vec<_>>();
 
         for file in files {
@@ -67,6 +65,12 @@ impl Deref for Posts {
 impl DerefMut for Posts {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
+    }
+}
+
+impl AsRef<Vec<Post>> for Posts {
+    fn as_ref(&self) -> &Vec<Post> {
+        &self.inner
     }
 }
 
