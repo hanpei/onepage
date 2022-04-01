@@ -1,7 +1,14 @@
 use anyhow::Result;
-use axum::{http::StatusCode, routing::get_service, Router};
+use axum::{
+    extract::{ws, WebSocketUpgrade},
+    http::StatusCode,
+    routing::{get, get_service},
+    Router,
+};
 use notify::{RecommendedWatcher, Watcher};
 use std::{net::SocketAddr, sync::mpsc, thread, time::Duration};
+
+use tokio::sync::broadcast;
 use tower_http::services::ServeDir;
 
 use crate::{SiteBuilder, OUTPUT_DIR, PAGE_DIR};
@@ -31,29 +38,36 @@ impl SiteServer {
     pub fn run(self) -> Result<()> {
         let mut site = SiteBuilder::new();
         site.build()?;
-
+        let (reload_channel, _) = broadcast::channel(10);
+        let tx = reload_channel.clone();
         let addr = format!("{}:{}", self.host, self.port).parse::<SocketAddr>()?;
         thread::spawn(move || {
-            serve(addr).unwrap();
+            serve(addr, reload_channel).unwrap();
         });
 
-        watch(&mut site);
+        watch(&mut site, tx);
 
         Ok(())
     }
 }
 
 #[tokio::main]
-async fn serve(address: SocketAddr) -> Result<()> {
-    let app = Router::new().nest(
-        "/",
-        get_service(ServeDir::new(OUTPUT_DIR)).handle_error(|error: std::io::Error| async move {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Unhandled internal error: {}", error),
-            )
-        }),
-    );
+async fn serve(address: SocketAddr, reload_channel: broadcast::Sender<()>) -> Result<()> {
+    let app = Router::new()
+        .fallback(get_service(ServeDir::new(OUTPUT_DIR)).handle_error(
+            |error: std::io::Error| async move {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Unhandled internal error: {}", error),
+                )
+            },
+        ))
+        .route(
+            "/__ws",
+            get(|ws: WebSocketUpgrade| async move {
+                ws.on_upgrade(|socket| async move { handle_socket(socket, reload_channel).await })
+            }),
+        );
 
     println!("Serving site on {}\n\n", address);
     axum::Server::bind(&address)
@@ -63,7 +77,7 @@ async fn serve(address: SocketAddr) -> Result<()> {
     Ok(())
 }
 
-pub fn watch(site: &mut SiteBuilder) {
+pub fn watch(site: &mut SiteBuilder, reload_channel: broadcast::Sender<()>) {
     let (tx, rx) = mpsc::channel();
 
     let mut watcher = RecommendedWatcher::new(tx, Duration::from_millis(50))
@@ -85,10 +99,29 @@ pub fn watch(site: &mut SiteBuilder) {
                         println!("Rebuilding site...");
                     }
                     site.rebuild().expect("Site rebuild failed");
+                    reload_channel
+                        .send(())
+                        .expect("livereloading message send failed");
                 }
                 _ => {}
             },
             Err(e) => println!("watch error: {:?}", e),
         }
     }
+}
+
+async fn handle_socket(
+    mut socket: ws::WebSocket,
+    reload_channel: broadcast::Sender<()>,
+) -> Result<()> {
+    let mut rx = reload_channel.subscribe();
+    while rx.recv().await.is_ok() {
+        println!("reload_channel recv ...");
+
+        let ws_send = socket.send(ws::Message::Text("reload".to_owned()));
+        if ws_send.await.is_err() {
+            break;
+        }
+    }
+    Ok(())
 }

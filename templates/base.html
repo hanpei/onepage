@@ -52,5 +52,19 @@
       <small>© 2022 </small>
     </footer>
     <script src="/assets/theme.js"></script>
+    <script>
+      const socket = new WebSocket('ws://localhost:8080/__ws');
+
+      socket.addEventListener('open', function (event) {
+        socket.send('Hello Server!');
+      });
+
+      socket.addEventListener('message', function (event) {
+        console.log('Message from server ', event.data);
+        if (event.data === 'reload') {
+          window.location.reload();
+        }
+      });
+    </script>
   </body>
 </html>
