@@ -68,6 +68,7 @@ tags:
 
 - [ ] custom site config file (maybe not)
 - [ ] generate new page
+- [x] live reload
 - [x] site initialize to new path
 - [x] css style
 - [x] add command line

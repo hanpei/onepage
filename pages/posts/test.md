@@ -8,5 +8,3 @@ tags:
 # Test
 
 this is content
-
-hotreload testing

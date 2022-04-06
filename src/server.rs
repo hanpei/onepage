@@ -116,7 +116,7 @@ async fn handle_socket(
 ) -> Result<()> {
     let mut rx = reload_channel.subscribe();
     while rx.recv().await.is_ok() {
-        println!("reload_channel recv ...");
+        // println!("reload_channel recv ...");
 
         let ws_send = socket.send(ws::Message::Text("reload".to_owned()));
         if ws_send.await.is_err() {
