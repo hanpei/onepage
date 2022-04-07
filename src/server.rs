@@ -110,10 +110,7 @@ pub fn watch(site: &mut SiteBuilder, reload_channel: broadcast::Sender<()>) {
     }
 }
 
-async fn handle_socket(
-    mut socket: ws::WebSocket,
-    reload_channel: broadcast::Sender<()>,
-) -> Result<()> {
+async fn handle_socket(mut socket: ws::WebSocket, reload_channel: broadcast::Sender<()>) {
     let mut rx = reload_channel.subscribe();
     while rx.recv().await.is_ok() {
         // println!("reload_channel recv ...");
@@ -123,5 +120,4 @@ async fn handle_socket(
             break;
         }
     }
-    Ok(())
 }

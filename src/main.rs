@@ -1,10 +1,11 @@
 use anyhow::Result;
-use clap::{Arg, Command};
+use clap::{crate_version, Arg, Command};
 use onepage::{init, SiteBuilder, SiteServer, STARTER_TEMPLATE_URL};
 
 fn main() -> Result<(), anyhow::Error> {
     let matches = Command::new("onepage")
         .author("hanpei")
+        .version(crate_version!())
         .arg_required_else_help(true)
         .subcommand_required(true)
         .about("A simple static site generator")
