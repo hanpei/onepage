@@ -4,7 +4,7 @@
 
 A simple static site genertor, convert md posts to html.
 
-- Read /pages markdown files
+- Read markdown files
 - Parse md to html by [pulldown cmark](https://docs.rs/pulldown-cmark/latest/pulldown_cmark/)
 - Render into [tera template](https://github.com/Keats/tera)
 - styled by [picocss](https://picocss.com/) and [highlightjs](https://highlightjs.org/)
@@ -17,16 +17,17 @@ A simple static site genertor, convert md posts to html.
 
 #### from repo
 
-clone this repo, and:
-`cargo run -- build` to build pages
-`cargo run -- serve` to build pages, and make a server at localhost
+- clone this repo, and:
+- `cargo run -- build` to build pages
+- `cargo run -- serve` to build pages, and make a server at localhost
 
 #### from cargo
 
-`cargo install onepage`
-`onepage init [dir]` : download template files from github
-`onepage serve`
-`onepage build`
+- `cargo install onepage`
+- `onepage init [dir]` : download template files from github
+- `onepage serve`
+- `onepage build`
+- `onepage new {filename}`: create new post
 
 ### Structure
 
@@ -46,6 +47,7 @@ clone this repo, and:
 - make a `.md` file in `/pages/posts/`
 - you can copy from demo md files
 - at present, post page **must** have a fontmatter header, including `title`(required),`date`(required),`tags`(optional)
+- or you can use `onepage new {filename}` to create new post.
 
 ```
 ---
@@ -67,7 +69,7 @@ tags:
 ### Todo
 
 - [ ] custom site config file (maybe not)
-- [ ] generate new page
+- [x] generate new page
 - [x] live reload
 - [x] site initialize to new path
 - [x] css style

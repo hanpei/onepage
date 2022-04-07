@@ -1,5 +1,6 @@
-use anyhow::Result;
-use std::{fs, path::Path};
+use anyhow::{bail, Result};
+use chrono::Local;
+use std::{fs, io::Write, path::Path};
 
 use crate::{
     page::{IndexPage, Posts},
@@ -36,6 +37,31 @@ impl SiteBuilder {
         });
         self.posts = posts;
         self.index = index;
+    }
+
+    pub fn create_page(&mut self, name: &str) -> Result<()> {
+        let path = self.config.get_page_posts_path().join(name);
+        if path.exists() {
+            bail!("Page already exists.");
+        }
+        let mut file = fs::File::create(&path)?;
+        let title = name.to_string().replace(".md", "");
+        let date = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+        let content = format!(
+            r#"---
+title: {title}
+date: {date}
+tags: 
+    - draft
+---
+
+# Write your post here.
+
+"#
+        );
+        file.write_all(content.as_bytes())?;
+        println!("✅ Create \"{}\" success.", &path.display().to_string());
+        Ok(())
     }
 
     pub fn rebuild(&mut self) -> Result<()> {
@@ -133,6 +159,8 @@ impl SiteBuilder {
 
 #[cfg(test)]
 mod tests {
+    use crate::page::Post;
+
     use super::*;
 
     #[test]
@@ -145,5 +173,17 @@ mod tests {
     fn test_build() {
         let mut site = SiteBuilder::new();
         assert!(site.build().is_ok());
+    }
+
+    #[test]
+    fn test_create_page() {
+        let mut site = SiteBuilder::new();
+        assert!(site.create_page("new.md").is_ok());
+        let path = Path::new("pages/posts/new.md");
+        let page = Post::load(&path);
+        assert!(page.is_ok());
+        let page = page.unwrap();
+        assert_eq!(page.title, "new");
+        fs::remove_file(&path).unwrap();
     }
 }
