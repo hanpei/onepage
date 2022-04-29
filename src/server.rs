@@ -99,9 +99,13 @@ pub fn watch(site: &mut SiteBuilder, reload_channel: broadcast::Sender<()>) {
                         println!("Rebuilding site...");
                     }
                     site.rebuild().expect("Site rebuild failed");
-                    reload_channel
-                        .send(())
-                        .expect("livereloading message send failed");
+                    // reload_channel
+                    //     .send(())
+                    //     .expect("livereloading message send failed");
+                    match reload_channel.send(()) {
+                        Ok(_) => (),
+                        Err(e) => println!("{}", e),
+                    }
                 }
                 _ => {}
             },
